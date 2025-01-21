@@ -1,1 +1,11 @@
-# S25_16825_CMU
+# Learning for 3D
+
+## Instructions for uploading to AFS:
+
+*  scp projX.zip snsyed@linux.andrew.cmu.edu:/afs/andrew.cmu.edu/usr snsyed/
+* ssh snsyed@linux.andrew.cmu.edu
+* unzip projX.zip
+* cp -r projX/ /afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/
+* cd /afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/
+* https://www.cs.cmu.edu/afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/
+
