@@ -26,11 +26,12 @@ def generate_vertex_gradient(mesh_vertices: torch.Tensor, start_color: List[floa
     end_color_tensor = torch.tensor(end_color)
     vertex_colors = torch.ones_like(mesh_vertices)
 
-    for idx,height in enumerate(normalized_heights):
+    for idx, height in enumerate(normalized_heights):
         blend_factor = height.item()
         vertex_color = blend_factor * end_color_tensor + (1 - blend_factor) * start_color_tensor
         vertex_colors[0][idx] = vertex_color
-    return vertex_color
+    
+    return vertex_colors
 
 def create_render(model_path: str='data/cow.obj', input_mesh: Optional[Meshes]=None, render_size: int=256, mesh_color: List[float]=[0.7,0.7,1], device: Optional[torch.device]=None, output_dir: str='output/', output_name: str = 'render.gif', rotation_step: int=5, animation_fps: int=15, gradient_colors: Optional[Tuple[List[float], List[float]]]=None, has_texture: bool=False, normalize_colors: bool=False, camera_distance: float=3.0, camera_height: float=0.0) -> List[np.ndarray]:
     '''
