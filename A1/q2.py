@@ -4,11 +4,7 @@ from pytorch3d.structures import Meshes
 from pytorch3d.renderer import TexturesVertex
 from q1_1 import create_render
 
-def create_3d_shape(
-    shape_type: str = "tetrahedron",
-    base_color: List[float] = [0.0, 0.4, 0.4],
-    scale: float = 1.0
-) -> Tuple[torch.Tensor, torch.Tensor]:
+def create_3d_shape(shape_type: str = "tetrahedron", base_color: List[float] = [0.0, 0.4, 0.4], scale: float = 1.0) -> Tuple[torch.Tensor, torch.Tensor]:
     """
     Create vertices and faces for basic 3D shapes.
     """
@@ -52,21 +48,12 @@ def create_3d_shape(
     
     return vertices, faces
 
-def visualize_3d_shape(
-    shape_type: str,
-    output_name: str,
-    render_size: int = 256,
-    base_color: List[float] = [0.0, 0.4, 0.4],
-    gradient_colors: Optional[Tuple[List[float], List[float]]] = None,
-    camera_distance: float = 3.0,
-    camera_height: float = 30.0,
-    scale: float = 1.0
-) -> None:
+def visualize_3d_shape(shape_type: str, output_name: str, render_size: int = 256, base_color: List[float] = [0.0, 0.4, 0.4], gradient_colors: Optional[Tuple[List[float], List[float]]] = None, camera_distance: float = 3.0, camera_height: float = 30.0, scale: float = 1.0) -> None:
     """
     Create and render a 3D geometric shape using the create_render function.    
     """
     vertices, faces = create_3d_shape(shape_type, base_color, scale)
-    vertices = vertices.unsqueeze(0)  # Add batch dimension
+    vertices = vertices.unsqueeze(0)
     faces = faces.unsqueeze(0)
     
     create_render(input_mesh=Meshes(verts=vertices, faces=faces, textures=TexturesVertex(torch.ones_like(vertices) * torch.tensor(base_color))), render_size=render_size, output_name=output_name, gradient_colors=gradient_colors, camera_distance=camera_distance, camera_height=camera_height)
