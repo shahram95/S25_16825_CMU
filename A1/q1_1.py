@@ -60,16 +60,13 @@ def create_render(model_path: str='data/cow.obj', input_mesh: Optional[Meshes]=N
         cameras = FoVPerspectiveCameras(R=rotation, T=translation, device=device)
         lights = PointLights(location=[[0,0,-3]], device=device)
 
-        # Get the render output
+
         frame = renderer(input_mesh, cameras=cameras, lights=lights)
-        
-        # Convert to numpy and extract RGB channels (remove alpha)
-        frame = frame.cpu().numpy()[0, ..., :3]  # Shape now: (H, W, 3)
+        frame = frame.cpu().numpy()[0, ..., :3]
 
         if normalize_colors:
             frame = np.clip(frame, 0, 1)
-        
-        # Convert to uint8 for saving
+
         frame = (frame * 255).astype(np.uint8)
         frames.append(frame)
     
