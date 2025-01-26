@@ -2,6 +2,7 @@
 
 ## Instructions for uploading to AFS:
 
+* jupyter nbconvert --to html index.ipynb
 *  scp projX.zip snsyed@linux.andrew.cmu.edu:/afs/andrew.cmu.edu/usr snsyed/
 * ssh snsyed@linux.andrew.cmu.edu
 * unzip projX.zip
