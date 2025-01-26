@@ -10,3 +10,7 @@
 * cd /afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/
 * https://www.cs.cmu.edu/afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/
 
+## Connect to CMU VPN
+
+/opt/cisco/anyconnect/bin/vpnui
+
