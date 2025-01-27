@@ -2,7 +2,7 @@ import os
 from PIL import Image
 from pathlib import Path
 
-def make_gifs_loop(input_folder="output", output_folder="output_loop", filter_pattern=None):
+def make_gifs_loop(input_folder="q7", output_folder="q7_out", filter_pattern=None):
     """
     Convert GIFs in the input folder to continuously looping GIFs in the output folder.
     """
@@ -63,4 +63,3 @@ def make_gifs_loop(input_folder="output", output_folder="output_loop", filter_pa
 
 if __name__ == "__main__":
     make_gifs_loop()
-    # make_gifs_loop(filter_pattern="q6")

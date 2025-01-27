@@ -42,7 +42,7 @@ def create_point_samples(model_path: str = "data/cow.obj", num_samples: int = 40
     
     return Pointclouds(points=sampled_points.unsqueeze(0), features=point_colors.unsqueeze(0))
 
-def render_points(point_cloud: Pointclouds, output_path: str, image_size: int = 256, background_color: List[float] = [0.0, 0.0, 0.0], device: Optional[torch.device] = None, fps: int = 15, rotation_step: int = 5, camera_distance: float = 10.0, camera_height: float = 10.0) -> List[np.ndarray]:
+def render_points(point_cloud: Pointclouds, output_path: str, image_size: int = 256, background_color: List[float] = [1.0, 1.0, 1.0], device: Optional[torch.device] = None, fps: int = 15, rotation_step: int = 5, camera_distance: float = 5.0, camera_height: float = 10.0) -> List[np.ndarray]:
     """Renders rotating animation of point cloud."""
     device = get_device() if device is None else device
     renderer = get_points_renderer(image_size=image_size, background_color=background_color).to(device)
@@ -79,7 +79,7 @@ def render_mesh(output_path: str, image_size: int = 256, device: Optional[torch.
     frames = []
     
     for angle in tqdm(range(-180, 180, 5), desc="Rendering mesh"):
-        R, T = look_at_view_transform(dist=10.0, elev=10.0, azim=angle)
+        R, T = look_at_view_transform(dist=5.0, elev=10.0, azim=angle)
         cameras = FoVPerspectiveCameras(R=R, T=T, device=device)
         lights = PointLights(location=[[0, 10.0, -3]], device=device)
         
