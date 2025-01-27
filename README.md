@@ -12,5 +12,5 @@
 
 ## Connect to CMU VPN
 
-/opt/cisco/anyconnect/bin/vpnui
-
+* /opt/cisco/anyconnect/bin/vpnui
+* https://web.archive.org/web/20240706211533/https://www.cs.cmu.edu/afs/andrew/course/16/825/www/projects/hravisan/
