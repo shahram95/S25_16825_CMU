@@ -31,19 +31,7 @@ def create_point_clouds(device=None):
 
    return point_cloud1, point_cloud2, point_cloud3
 
-def render_point_cloud(
-   point_cloud,
-   render_size=256,
-   bg_color=(1, 1, 1),
-   output_dir="output/",
-   output_name="point_cloud.gif", 
-   device=None,
-   animation_fps=15,
-   rotation_step=5,
-   camera_distance=7,
-   camera_elevation=0,
-   flip_orientation=True
-):
+def render_point_cloud(point_cloud, render_size=256, bg_color=(1, 1, 1), output_dir="output/", output_name="point_cloud.gif",  device=None, animation_fps=15, rotation_step=5, camera_distance=7, camera_elevation=0, flip_orientation=True):
    """Renders a 360-degree animation of a point cloud with configurable camera parameters."""
    device = get_device() if device is None else device
    renderer = get_points_renderer(image_size=render_size, background_color=bg_color)

@@ -56,7 +56,7 @@ if __name__ == "__main__":
     )
 
     create_camera_transform(
-        translation_vector=[0.5, -0.5, -0.05],
+        translation_vector=[0.4, -0.45, -0.03],
         output_name="q4_3.jpg"
     )
 
@@ -64,6 +64,6 @@ if __name__ == "__main__":
     R4 = pytorch3d.transforms.euler_angles_to_matrix(angle4, "XYZ")
     create_camera_transform(
         rotation_matrix=R4,
-        translation_vector=[3, 0, 3],
+        translation_vector=[4, 0, 4],
         output_name="q4_4.jpg"
     )
