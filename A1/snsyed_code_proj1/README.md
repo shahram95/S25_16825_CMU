@@ -7,7 +7,13 @@ conda activate learning3d
 cd <path_to_solution_folder>
 ```
 
-ss
+The submitted report can be found over here: https://www.cs.cmu.edu/afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/proj1/
+
+### Run all exercise solution
+
+```
+python main.py
+```
 
 ### 1.1. 360-degree Renders (5 points)
 
