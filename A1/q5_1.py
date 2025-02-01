@@ -62,9 +62,9 @@ def render_point_cloud(point_cloud, render_size=256, bg_color=(1, 1, 1), output_
 
 def main():
     point_cloud1, point_cloud2, point_cloud3 = create_point_clouds()
-    render_point_cloud(point_cloud1, render_size=1024, output_name="point_cloud1.gif")
-    render_point_cloud(point_cloud2, render_size=1024, output_name="point_cloud2.gif") 
-    render_point_cloud(point_cloud3, render_size=1024, output_name="point_cloud3.gif")
+    render_point_cloud(point_cloud1, render_size=1024, output_name="q5_1_1.gif")
+    render_point_cloud(point_cloud2, render_size=1024, output_name="q5_1_2.gif") 
+    render_point_cloud(point_cloud3, render_size=1024, output_name="q5_1_3.gif")
 
 if __name__ == "__main__":
     main()
