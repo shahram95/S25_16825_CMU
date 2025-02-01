@@ -54,5 +54,8 @@ def create_dolly_zoom_effect(model_path: str="data/cow_on_plane.obj", render_siz
     imageio.mimsave(output_path, annotated_frames, fps=fps)
     return annotated_frames
 
-if __name__ == '__main__':
+def main():
     create_dolly_zoom_effect(render_size=1024, frame_count=30, animation_duration=3, output_path="output/q1_2.gif")
+
+if __name__ == '__main__':
+    main()

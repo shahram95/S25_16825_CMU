@@ -58,6 +58,9 @@ def visualize_3d_shape(shape_type: str, output_name: str, render_size: int = 256
     
     create_render(input_mesh=Meshes(verts=vertices, faces=faces, textures=TexturesVertex(torch.ones_like(vertices) * torch.tensor(base_color))), render_size=render_size, output_name=output_name, gradient_colors=gradient_colors, camera_distance=camera_distance, camera_height=camera_height)
 
-if __name__ == "__main__":
+def main():
     visualize_3d_shape(shape_type="tetrahedron", output_name="q2_1.gif", render_size=1024, base_color=[0.0, 0.5, 0.8], camera_height=30.0, gradient_colors=([0.0, 0.3, 0.6], [0.0, 0.7, 1.0]))
     visualize_3d_shape(shape_type="cube", output_name="q2_2.gif", render_size=1024, base_color=[0.8, 0.2, 0.2], camera_height=20.0, gradient_colors=([0.6, 0.1, 0.1], [1.0, 0.3, 0.3]))
+
+if __name__ == "__main__":
+    main()

@@ -105,5 +105,8 @@ def create_cottage_scene(model_path: str = "data/cottage_obj.obj", diffuse_map: 
     output_path = os.path.join(output_dir, output_name)
     imageio.mimsave(output_path, frames, fps=animation_fps)
 
-if __name__ == "__main__":
+def main():
     create_cottage_scene(image_size=1024, diffuse_map="data/cottage_diffuse.png", normal_map="data/cottage_normal.png", output_name="cottage_scene.gif", animation_fps=20,background_color=[0.1, 0.1, 0.2])
+
+if __name__ == "__main__":
+    main()

@@ -42,7 +42,7 @@ def create_camera_transform(model_path: str = "data/cow_with_axis.obj", render_s
     return rendered_image
 
 
-if __name__ == "__main__":
+def main():
     angle1 = torch.tensor([0, 0, np.pi/2])
     R1 = pytorch3d.transforms.euler_angles_to_matrix(angle1, "XYZ")
     create_camera_transform(
@@ -67,3 +67,6 @@ if __name__ == "__main__":
         translation_vector=[4, 0, 4],
         output_name="q4_4.jpg"
     )
+
+if __name__ == "__main__":
+    main()

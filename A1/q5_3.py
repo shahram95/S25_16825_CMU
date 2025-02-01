@@ -98,7 +98,7 @@ def render_implicit_mesh(mesh: pytorch3d.structures.Meshes, device: torch.device
     plt.imsave(os.path.join(output_dir, output_name.replace('.gif', '.jpg')), frame)
     create_render(input_mesh=mesh, render_size=resolution, output_dir=output_dir, output_name=output_name, rotation_step=rotation_step, animation_fps=fps, normalize_colors=True, camera_distance=camera_distance, camera_height=elevation)
 
-if __name__ == "__main__":
+def main():
     device = get_device()
     output_dir = "output"
     
@@ -107,3 +107,6 @@ if __name__ == "__main__":
     
     cylinder_mesh = create_fancy_mesh(resolution=1024, device=device)
     render_implicit_mesh(cylinder_mesh, resolution=1024, output_dir=output_dir, output_name="q5_3_2.gif", camera_distance=8.0, elevation=30.0, rotation_step=3)
+
+if __name__ == "__main__":
+    main()

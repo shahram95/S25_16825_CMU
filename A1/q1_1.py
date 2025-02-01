@@ -75,5 +75,8 @@ def create_render(model_path: str='data/cow.obj', input_mesh: Optional[Meshes]=N
     imageio.mimsave(output_path, frames, fps=animation_fps, loop=0)
     return frames
 
-if __name__ == "__main__":
+def main():
     create_render(render_size=1024, output_dir="output", output_name="q1_1.gif")
+
+if __name__ == "__main__":
+    main()

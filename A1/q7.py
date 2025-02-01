@@ -116,5 +116,8 @@ def create_comparison(output_dir: str = "output", sample_sizes: List[int] = [10,
     
     imageio.mimsave(f"{output_dir}/q7_comparison.gif", combined_frames, fps=15)
 
-if __name__ == "__main__":
+def main():
     create_comparison(output_dir="output", sample_sizes=[10, 100, 1000, 10000], image_size=1024)
+
+if __name__ == "__main__":
+    main()

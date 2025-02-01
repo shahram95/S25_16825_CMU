@@ -69,7 +69,7 @@ def render_parametric_shape(point_cloud: Pointclouds, render_size: int = 256, ba
     
     imageio.mimsave(output_dir + output_name, frames, fps=fps)
 
-if __name__ == "__main__":
+def main():
     device = get_device()
     
     torus_cloud = create_torus_point_cloud(num_samples=800, device=device)
@@ -77,3 +77,6 @@ if __name__ == "__main__":
     
     saddle_cloud = create_saddle_point_cloud(num_samples=600, device=device)
     render_parametric_shape(saddle_cloud, render_size=1024, output_name="q5_2_2.gif", background_color=(0.95, 0.95, 1.0), camera_distance=8.0, camera_elevation=30.0, rotation_step=3, device=device)
+
+if __name__ == "__main__":
+    main()
