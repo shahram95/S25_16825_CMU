@@ -47,7 +47,7 @@ def create_dolly_zoom_effect(model_path: str="data/cow_on_plane.obj", render_siz
         drawer = ImageDraw.Draw(image)
         text_position = (20,20)
         text_color = (255,0,0)
-        # drawer.text(text_position, f'FOV: {fov_sequence[idx]:.2f}°', fill=text_color)
+        drawer.text(text_position, f'FOV: {fov_sequence[idx]:.2f}°', fill=text_color)
         annotated_frames.append(np.array(image))
     
     fps = frame_count / animation_duration
