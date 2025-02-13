@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from pytorch3d.transforms import Rotate, axis_angle_to_matrix
 import math
 import numpy as np
+import os
+from utils_vis import *
 
 def get_args_parser():
     parser = argparse.ArgumentParser('Singleto3D', add_help=False)
@@ -169,6 +171,60 @@ def evaluate_model(args):
         #     # visualization block
         #     #  rend = 
         #     plt.imsave(f'vis/{step}_{args.type}.png', rend)
+        # Inside evaluate_model function, replace the TODO block with:
+        if (step % args.vis_freq) == 0:
+            input_img = images_gt[0, ..., :3].detach().cpu().numpy().clip(0, 1)
+            
+            if args.type == "vox":
+                f1_05 = metrics['F1@0.050000'].float()
+                if f1_05 > 15:
+                    os.makedirs('results/vox', exist_ok=True)
+                    plt.imsave(f'results/vox/{step}_{args.type}_input.png', input_img)
+                    visualize_voxels(feed_dict['voxels'].to(args.device)[0], 
+                                filename=f'vox/{step}_{args.type}_gt.gif',
+                                image_size=DEFAULT_IMAGE_SIZE,
+                                distance=3)
+                    
+                    visualize_voxels(predictions[0], 
+                                filename=f'vox/{step}_{args.type}_pred.gif',
+                                image_size=DEFAULT_IMAGE_SIZE,
+                                distance=3)
+                    
+                    visualize_mesh_model(mesh_gt, 
+                                    filename=f'vox/{step}_{args.type}_gt_mesh.gif',
+                                    image_size=DEFAULT_IMAGE_SIZE)
+                    
+            elif args.type == "point":
+                f1_05 = metrics['F1@0.050000'].float()
+                if f1_05 < 80:
+                    os.makedirs('results/pt_ext', exist_ok=True)
+                    
+                    plt.imsave(f'results/pt_ext/{step}_{args.type}_input.png', input_img)
+                    points_gt = sample_points_from_meshes(mesh_gt, args.n_points)
+                    visualize_point_cloud_from_points(points_gt, 
+                                                filename=f'pt_ext/{step}_{args.type}_gt_pc.gif',
+                                                image_size=DEFAULT_IMAGE_SIZE)
+                    
+                    visualize_point_cloud_from_points(predictions, 
+                                                filename=f'pt_ext/{step}_{args.type}_pred.gif',
+                                                image_size=DEFAULT_IMAGE_SIZE)
+                    
+                    visualize_mesh_model(mesh_gt, 
+                                    filename=f'pt_ext/{step}_{args.type}_gt_mesh.gif',
+                                    image_size=DEFAULT_IMAGE_SIZE)
+                    
+            elif args.type == "mesh":
+                f1_05 = metrics['F1@0.050000'].float()
+                if f1_05 < 90:
+                    os.makedirs('results/meshes', exist_ok=True)                    
+                    plt.imsave(f'results/meshes/{step}_{args.type}_input.png', input_img)
+                    visualize_mesh_model(predictions, 
+                                    filename=f'meshes/{step}_{args.type}_pred.gif',
+                                    image_size=DEFAULT_IMAGE_SIZE)
+                    
+                    visualize_mesh_model(mesh_gt, 
+                                    filename=f'meshes/{step}_{args.type}_gt_mesh.gif',
+                                    image_size=DEFAULT_IMAGE_SIZE)
       
 
         total_time = time.time() - start_time
