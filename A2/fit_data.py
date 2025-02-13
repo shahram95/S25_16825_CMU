@@ -9,7 +9,7 @@ from pytorch3d.ops import sample_points_from_meshes
 from pytorch3d.structures import Meshes
 import dataset_location
 import torch
-
+from utils_vis import *
 
 
 
@@ -130,6 +130,9 @@ def train_model(args):
         # fitting
         fit_voxel(voxels_src, voxels_tgt, args)
 
+        visualize_voxels(voxels_src, filename="q1_1_1.gif")
+        visualize_voxels(voxels_tgt, filename="q1_1_2.gif")
+
 
     elif args.type == "point":
         # initialization
@@ -138,7 +141,10 @@ def train_model(args):
         pointclouds_tgt = sample_points_from_meshes(mesh_tgt, args.n_points)
 
         # fitting
-        fit_pointcloud(pointclouds_src, pointclouds_tgt, args)        
+        fit_pointcloud(pointclouds_src, pointclouds_tgt, args)
+
+        visualize_point_cloud_from_points(pointclouds_src, filename="q1_2_1.gif")
+        visualize_point_cloud_from_points(pointclouds_tgt, filename="q1_2_2.gif")        
     
     elif args.type == "mesh":
         # initialization
@@ -147,7 +153,9 @@ def train_model(args):
         mesh_tgt = Meshes(verts=[feed_cuda['verts']], faces=[feed_cuda['faces']])
 
         # fitting
-        fit_mesh(mesh_src, mesh_tgt, args)        
+        fit_mesh(mesh_src, mesh_tgt, args)
+        visualize_mesh_model(mesh_src, filename="q1_3_1.gif")
+        visualize_mesh_model(mesh_tgt, filename="q1_3_2.gif")        
 
 
     
