@@ -1,3 +1,5 @@
 A2/r2n2_shapenet_dataset/
 A2/r2n2_shapenet_dataset_full/
 A1/output/cottage_scene.gif
+A2/*.pth
+A2_curr/
