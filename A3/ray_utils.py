@@ -4,7 +4,7 @@ from typing import List, NamedTuple
 import torch
 import torch.nn.functional as F
 from pytorch3d.renderer.cameras import CamerasBase
-
+import numpy as np
 
 # Convenience class wrapping several ray inputs:
 #   1) Origins -- ray origins
@@ -108,8 +108,7 @@ def get_random_pixels_from_image(n_pixels, image_size, camera):
     xy_grid = get_pixels_from_image(image_size, camera)
     
     # TODO (Q2.1): Random subsampling of pixel coordinaters
-    indices = torch.randperm(xy_grid.shape[0], device=camera.device)[:n_pixels]
-    xy_grid_sub = xy_grid[indices]
+    xy_grid_sub = xy_grid[np.random.choice(xy_grid.shape[0], n_pixels)].to("cuda")
 
     # Return
     return xy_grid_sub.reshape(-1, 2)[:n_pixels]
