@@ -155,7 +155,28 @@ class SphereTracingRenderer(torch.nn.Module):
         #   in order to compute intersection points of rays with the implicit surface
         # 2) Maintain a mask with the same batch dimension as the ray origins,
         #   indicating which points hit the surface, and which do not
-        pass
+        N = origins.shape[0]
+        points = origins.clone()
+        t = torch.zeros(N, 1, device=origins.device)
+        mask = torch.zeros(N, 1, dtype=torch.bool, device=origins.device)
+        active = torch.ones(N, 1, dtype=torch.bool, device=origins.device)
+        eps = 1e-4
+
+        for _ in range(self.max_iters):
+            with torch.no_grad():
+                sdf = implicit_fn(points)
+                hit = torch.abs(sdf) < eps
+                mask = torch.logical_or(mask, hit)
+                too_far = t > self.far
+                active = torch.logical_and(~mask, ~too_far)
+
+                if not active.any():
+                    break
+                
+                t = t + sdf
+                points = origins + t * directions
+        
+        return points, mask
 
     def forward(
         self,
@@ -205,7 +226,10 @@ class SphereTracingRenderer(torch.nn.Module):
 
 def sdf_to_density(signed_distance, alpha, beta):
     # TODO (Q7): Convert signed distance to density with alpha, beta parameters
-    pass
+    inside_term = 1 - 0.5 * torch.exp(signed_distance / beta)
+    outside_term = 0.5 * torch.exp(-signed_distance / beta)
+    density = torch.where(signed_distance <= 0, inside_term, outside_term)
+    return alpha * density
 
 class VolumeSDFRenderer(VolumeRenderer):
     def __init__(
@@ -242,7 +266,7 @@ class VolumeSDFRenderer(VolumeRenderer):
 
             # Call implicit function with sample points
             distance, color = implicit_fn.get_distance_color(cur_ray_bundle.sample_points)
-            density = None # TODO (Q7): convert SDF to density
+            density = sdf_to_density(distance, self.alpha, self.beta) # TODO (Q7): convert SDF to density
 
             # Compute length of each ray segment
             depth_values = cur_ray_bundle.sample_lengths[..., 0]
