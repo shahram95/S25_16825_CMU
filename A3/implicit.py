@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
 from torch import autograd
-
+import math
 from ray_utils import RayBundle
-
+import torch.nn as nn
 
 # Sphere SDF class
 class SphereSDF(torch.nn.Module):
@@ -450,10 +450,316 @@ class NeuralSurface(torch.nn.Module):
         
         return distance, gradient
 
+# class ComplexScene(torch.nn.Module):
+#     def __init__(
+#         self,
+#         cfg,
+#     ):
+#         super().__init__()
+        
+#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+#         self.dummy_param = nn.Parameter(torch.zeros(1, device=self.device))        
+#         self.primitives = []
+#         self.rotation_speed = 0.5  # Controls animation speed
+        
+#         # The Sun (central glowing sphere)
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([0.0, 0.0, 0.0], device=self.device),
+#             "radius": 1.2,
+#             "color": torch.tensor([1.0, 0.7, 0.2], device=self.device),
+#             "emissive": True,
+#             "id": "sun"
+#         })
+        
+#         # Mercury
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([1.8, 0.0, 0.0], device=self.device),
+#             "radius": 0.15,
+#             "color": torch.tensor([0.7, 0.6, 0.5], device=self.device),
+#             "orbit_radius": 1.8,
+#             "orbit_speed": 4.0,
+#             "id": "mercury"
+#         })
+        
+#         # Venus with atmosphere
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([2.5, 0.0, 0.0], device=self.device),
+#             "radius": 0.2,
+#             "color": torch.tensor([0.9, 0.7, 0.4], device=self.device),
+#             "orbit_radius": 2.5,
+#             "orbit_speed": 3.0,
+#             "id": "venus"
+#         })
+        
+#         # Venus atmosphere
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([2.5, 0.0, 0.0], device=self.device),
+#             "radius": 0.23,
+#             "color": torch.tensor([1.0, 0.8, 0.6], device=self.device),
+#             "orbit_radius": 2.5,
+#             "orbit_speed": 3.0,
+#             "opacity": 0.3,
+#             "id": "venus_atmosphere"
+#         })
+        
+#         # Earth
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([3.3, 0.0, 0.0], device=self.device),
+#             "radius": 0.25,
+#             "color": torch.tensor([0.2, 0.4, 0.8], device=self.device),
+#             "orbit_radius": 3.3,
+#             "orbit_speed": 2.5,
+#             "id": "earth"
+#         })
+        
+#         # Earth's Moon
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([3.3, 0.0, 0.4], device=self.device),
+#             "radius": 0.07,
+#             "color": torch.tensor([0.8, 0.8, 0.8], device=self.device),
+#             "orbit_radius": 0.4,
+#             "orbit_center": "earth",
+#             "orbit_speed": 10.0,
+#             "id": "moon"
+#         })
+        
+#         # Mars
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([4.0, 0.0, 0.0], device=self.device),
+#             "radius": 0.22,
+#             "color": torch.tensor([0.9, 0.3, 0.2], device=self.device),
+#             "orbit_radius": 4.0,
+#             "orbit_speed": 2.0,
+#             "id": "mars"
+#         })
+        
+#         # Asteroid belt (multiple small rocks)
+#         for i in range(40):
+#             angle = i * 2 * math.pi / 40
+#             radius_var = 4.8 + 0.4 * torch.rand(1).item()
+#             size_var = 0.02 + 0.04 * torch.rand(1).item()
+#             y_offset = 0.1 * torch.randn(1).item()
+            
+#             self.primitives.append({
+#                 "type": "sphere",
+#                 "center": torch.tensor([
+#                     radius_var * math.cos(angle),
+#                     y_offset,
+#                     radius_var * math.sin(angle)
+#                 ], device=self.device),
+#                 "radius": size_var,
+#                 "color": torch.tensor([0.6, 0.6, 0.5], device=self.device),
+#                 "orbit_radius": radius_var,
+#                 "orbit_speed": 1.5 + torch.rand(1).item(),
+#                 "orbit_y_offset": y_offset,
+#                 "id": f"asteroid_{i}"
+#             })
+        
+#         # Jupiter (gas giant)
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([6.0, 0.0, 0.0], device=self.device),
+#             "radius": 0.5,
+#             "color": torch.tensor([0.8, 0.7, 0.6], device=self.device),
+#             "orbit_radius": 6.0,
+#             "orbit_speed": 1.0,
+#             "id": "jupiter"
+#         })
+        
+#         # Jupiter's bands (decorative stripes)
+#         for i in range(5):
+#             offset = 0.1 * (i - 2)
+#             self.primitives.append({
+#                 "type": "torus",
+#                 "center": torch.tensor([6.0, offset, 0.0], device=self.device),
+#                 "radii": torch.tensor([0.5, 0.04], device=self.device),
+#                 "color": torch.tensor([0.9, 0.8, 0.7] if i % 2 == 0 else [0.7, 0.6, 0.5], device=self.device),
+#                 "orbit_radius": 6.0,
+#                 "orbit_speed": 1.0,
+#                 "id": f"jupiter_band_{i}"
+#             })
+        
+#         # Saturn
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([7.5, 0.0, 0.0], device=self.device),
+#             "radius": 0.45,
+#             "color": torch.tensor([0.9, 0.8, 0.6], device=self.device),
+#             "orbit_radius": 7.5,
+#             "orbit_speed": 0.8,
+#             "id": "saturn"
+#         })
+        
+#         # Saturn's rings
+#         for i in range(3):
+#             ring_radius = 0.65 + i * 0.15
+#             self.primitives.append({
+#                 "type": "torus",
+#                 "center": torch.tensor([7.5, 0.0, 0.0], device=self.device),
+#                 "radii": torch.tensor([ring_radius, 0.03], device=self.device),
+#                 "color": torch.tensor([0.9, 0.85, 0.7], device=self.device),
+#                 "orbit_radius": 7.5,
+#                 "orbit_speed": 0.8,
+#                 "id": f"saturn_ring_{i}"
+#             })
+        
+#         # Uranus
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([8.7, 0.0, 0.0], device=self.device),
+#             "radius": 0.35,
+#             "color": torch.tensor([0.6, 0.8, 0.9], device=self.device),
+#             "orbit_radius": 8.7,
+#             "orbit_speed": 0.6,
+#             "id": "uranus"
+#         })
+        
+#         # Neptune
+#         self.primitives.append({
+#             "type": "sphere",
+#             "center": torch.tensor([9.8, 0.0, 0.0], device=self.device),
+#             "radius": 0.33,
+#             "color": torch.tensor([0.2, 0.4, 0.9], device=self.device),
+#             "orbit_radius": 9.8,
+#             "orbit_speed": 0.5,
+#             "id": "neptune"
+#         })
+        
+#         # Background stars (small bright dots)
+#         for i in range(50):
+#             # Generate random positions in a spherical distribution
+#             theta = 2 * math.pi * torch.rand(1).item()
+#             phi = math.acos(2 * torch.rand(1).item() - 1)
+#             radius = 15.0
+            
+#             # Convert to Cartesian coordinates
+#             x = radius * math.sin(phi) * math.cos(theta)
+#             y = radius * math.sin(phi) * math.sin(theta)
+#             z = radius * math.cos(phi)
+            
+#             # Create a small bright star
+#             star_color = torch.tensor([
+#                 0.8 + 0.2 * torch.rand(1).item(),
+#                 0.8 + 0.2 * torch.rand(1).item(),
+#                 0.8 + 0.2 * torch.rand(1).item()
+#             ], device=self.device)
+            
+#             self.primitives.append({
+#                 "type": "sphere",
+#                 "center": torch.tensor([x, y, z], device=self.device),
+#                 "radius": 0.05 + 0.05 * torch.rand(1).item(),
+#                 "color": star_color,
+#                 "id": f"star_{i}"
+#             })
+
+#     def update_positions(self, time):
+#         """Update positions of all objects based on their orbits"""
+#         for primitive in self.primitives:
+#             if "orbit_radius" in primitive:
+#                 if "orbit_center" in primitive:
+#                     # Find the center object
+#                     for p in self.primitives:
+#                         if p["id"] == primitive["orbit_center"]:
+#                             center_pos = p["center"]
+#                             break
+#                 else:
+#                     # Orbit around the sun
+#                     center_pos = torch.tensor([0.0, 0.0, 0.0], device=self.device)
+                
+#                 # Calculate orbital position
+#                 angle = (time * primitive["orbit_speed"] * self.rotation_speed) % (2 * math.pi)
+#                 y_offset = primitive.get("orbit_y_offset", 0.0)
+                
+#                 # Update center position
+#                 primitive["center"] = center_pos + torch.tensor([
+#                     primitive["orbit_radius"] * math.cos(angle),
+#                     y_offset,
+#                     primitive["orbit_radius"] * math.sin(angle)
+#                 ], device=self.device)
+
+#     def forward(self, points, time=0.0):
+#         """Compute the SDF value for each point"""
+#         # Update positions based on time
+#         self.update_positions(time)
+        
+#         batch_size = points.shape[0]
+#         sdf = torch.ones(batch_size, 1, device=points.device) * 100  # Initialize with large values
+        
+#         for primitive in self.primitives:
+#             if primitive["type"] == "sphere":
+#                 center = primitive["center"]
+#                 radius = primitive["radius"]
+#                 dist = torch.norm(points - center, dim=1, keepdim=True) - radius
+                
+#             elif primitive["type"] == "torus":
+#                 center = primitive["center"]
+#                 radii = primitive["radii"]
+#                 p = points - center
+                
+#                 # Torus SDF calculation
+#                 x2z2 = torch.sum(p[:, [0, 2]]**2, dim=1, keepdim=True)
+#                 dist = torch.sqrt(x2z2 + p[:, 1:2]**2 + radii[1]**2 - 2 * radii[0] * torch.sqrt(x2z2)) - radii[1]
+                
+#             else:
+#                 # Skip unknown primitive types
+#                 continue
+            
+#             # Apply union operation (minimum)
+#             sdf = torch.minimum(sdf, dist)
+            
+#         return sdf
+    
+#     def get_color(self, points, time=0.0):
+#         """Get the color of the closest primitive for each point"""
+#         # Update positions based on time
+#         self.update_positions(time)
+        
+#         batch_size = points.shape[0]
+#         colors = torch.zeros(batch_size, 3, device=points.device)
+        
+#         # Find the closest primitive for each point
+#         for i, point in enumerate(points):
+#             min_dist = float('inf')
+#             min_idx = 0
+            
+#             for j, primitive in enumerate(self.primitives):
+#                 if primitive["type"] == "sphere":
+#                     center = primitive["center"]
+#                     radius = primitive["radius"]
+#                     dist = torch.norm(point - center) - radius
+                    
+#                 elif primitive["type"] == "torus":
+#                     center = primitive["center"]
+#                     radii = primitive["radii"]
+#                     p = point - center
+                    
+#                     x2z2 = torch.sum(p[[0, 2]]**2)
+#                     dist = torch.sqrt(x2z2 + p[1]**2 + radii[1]**2 - 2 * radii[0] * torch.sqrt(x2z2)) - radii[1]
+                    
+#                 else:
+#                     # Skip unknown primitive types
+#                     continue
+                
+#                 if dist < min_dist:
+#                     min_dist = dist
+#                     min_idx = j
+            
+#             colors[i] = self.primitives[min_idx]["color"]
+            
+#         return colors
 
 implicit_dict = {
     'sdf_volume': SDFVolume,
     'nerf': NeuralRadianceField,
     'sdf_surface': SDFSurface,
     'neural_surface': NeuralSurface,
+    'complex_scene': ComplexScene,
 }
