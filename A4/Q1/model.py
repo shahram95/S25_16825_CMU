@@ -373,7 +373,9 @@ class Gaussians:
         """
         ### YOUR CODE HERE ###
         # HINT: Refer to README for a relevant equation
-        power = None  # (N, H*W)
+        diff = points_2D - means_2D
+        diff_cov_inv = torch.bmm(diff, cov_2D_inverse)
+        power = -0.5 * torch.sum(diff_cov_inv * diff, dim=2)
 
         return power
 
