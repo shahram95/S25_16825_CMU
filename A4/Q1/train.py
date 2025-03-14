@@ -37,7 +37,6 @@ def setup_optimizer(gaussians):
         {'params': [gaussians.means], 'lr': 0.0001, "name": "means"},
     ]
     optimizer = torch.optim.Adam(parameters, lr=0.0, eps=1e-15)
-    optimizer = None
 
     return optimizer
 
@@ -137,6 +136,9 @@ def run_training(args):
     # Saving training progess GIF
     imageio.mimwrite(viz_gif_path_1, viz_frames, loop=0, duration=(1/10.0)*1000)
 
+    print(f"[*] First GIF saved to: {viz_gif_path_1}")
+    print(f"[*] Number of frames in first GIF: {len(viz_frames)}")
+
     # Creating renderings of the training views after training is completed.
     frames = []
     viz_loader = DataLoader(
@@ -172,6 +174,8 @@ def run_training(args):
 
     # Saving renderings
     imageio.mimwrite(viz_gif_path_2, frames, loop=0, duration=(1/10.0)*1000)
+    print(f"[*] Second GIF saved to: {viz_gif_path_2}")
+    print(f"[*] Number of frames in second GIF: {len(frames)}")
 
     # Running evaluation using the test dataset
     psnr_vals, ssim_vals = [], []
