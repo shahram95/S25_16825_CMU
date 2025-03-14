@@ -280,20 +280,26 @@ class Gaussians:
         """
         ### YOUR CODE HERE ###
         # HINT: For computing the jacobian J, can you find a function in this file that can help?
-        J = None  # (N, 2, 3)
+        J = self._compute_jacobian(means_3D, camera, img_size)  # (N, 2, 3)
 
         ### YOUR CODE HERE ###
         # HINT: Can you extract the world to camera rotation matrix (W) from one of the inputs
         # of this function?
-        W = None  # (N, 3, 3)
+        W = camera.get_world_to_view_transform().get_matrix()[:, :3, :3]  # (N, 3, 3)
+        N = means_3D.shape[0]
+        if W.dim() == 2:  # If W is (3, 3) instead of (N, 3, 3)
+            W = W.unsqueeze(0).expand(N, -1, -1)  # Make it (N, 3, 3)
 
         ### YOUR CODE HERE ###
         # HINT: Can you find a function in this file that can help?
-        cov_3D = None  # (N, 3, 3)
+        cov_3D = self.compute_cov_3D(quats, scales)  # (N, 3, 3)
 
         ### YOUR CODE HERE ###
         # HINT: Use the above three variables to compute cov_2D
-        cov_2D = None  # (N, 2, 2)
+        WΣ = torch.bmm(W, cov_3D)  # (N, 3, 3)
+        WΣWT = torch.bmm(WΣ, W.transpose(1, 2))  # (N, 3, 3)
+        JWΣ = torch.bmm(J, WΣWT)  # (N, 2, 3)
+        cov_2D = torch.bmm(JWΣ, J.transpose(1, 2))
 
         # Post processing to make sure that each 2D Gaussian covers atleast approximately 1 pixel
         cov_2D[:, 0, 0] += 0.3
