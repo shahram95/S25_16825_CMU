@@ -15,7 +15,10 @@ def make_trainable(gaussians):
 
     ### YOUR CODE HERE ###
     # HINT: You can access and modify parameters from gaussians
-    pass
+    gaussians.means.requires_grad = True
+    gaussians.pre_act_scales.requires_grad = True
+    gaussians.colours.requires_grad = True
+    gaussians.pre_act_opacities.requires_grad = True
 
 def setup_optimizer(gaussians):
 
