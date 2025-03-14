@@ -18,7 +18,30 @@ def make_trainable(gaussians):
 
     ### YOUR CODE HERE ###
     # HINT: You can access and modify parameters from gaussians
-    pass
+    # Core parameters that always need to be trainable
+    trainable_params = [
+        'means',
+        'pre_act_scales',
+        'colours',
+        'pre_act_opacities'
+    ]
+    
+    # Set required parameters as trainable
+    for param_name in trainable_params:
+        param = getattr(gaussians, param_name)
+        param.requires_grad = True
+    
+    # Only set quaternions as trainable if not isotropic
+    if not gaussians.is_isotropic:
+        try:
+            gaussians.pre_act_quats.requires_grad = True
+        except (AttributeError, TypeError):
+            pass  # Parameter doesn't exist
+    
+    # Mark gaussians as initialized from trainable parameters
+    gaussians.init_type = "random"
+    
+    return gaussians
 
 def setup_optimizer(gaussians):
 
@@ -31,13 +54,12 @@ def setup_optimizer(gaussians):
     # fast with the default settings.
     # HINT: Consider setting different learning rates for different sets of parameters.
     parameters = [
-        {'params': [gaussians.pre_act_opacities], 'lr': 0.05, "name": "opacities"},
-        {'params': [gaussians.pre_act_scales], 'lr': 0.05, "name": "scales"},
-        {'params': [gaussians.colours], 'lr': 0.05, "name": "colours"},
-        {'params': [gaussians.means], 'lr': 0.05, "name": "means"},
+        {'params': [gaussians.pre_act_opacities], 'lr': 0.002, "name": "opacities"},
+        {'params': [gaussians.pre_act_scales], 'lr': 0.002, "name": "scales"},
+        {'params': [gaussians.colours], 'lr': 0.002, "name": "colours"},
+        {'params': [gaussians.means], 'lr': 0.001, "name": "means"},
     ]
     optimizer = torch.optim.Adam(parameters, lr=0.0, eps=1e-15)
-    optimizer = None
 
     return optimizer
 
@@ -117,11 +139,15 @@ def run_training(args):
         # HINT: Set img_size to (128, 128)
         # HINT: Get per_splat from args.gaussians_per_splat
         # HINT: camera is available above
-        pred_img = None
+        pred_img, _, _ = scene.render(camera, 
+                                            per_splat=args.gaussians_per_splat,
+                                            img_size=(128,128),
+                                            bg_colour=(0.0, 0.0, 0.0)
+                                            )
 
         # Compute loss
         ### YOUR CODE HERE ###
-        loss = None
+        loss = torch.nn.functional.l1_loss(pred_img, gt_img)
 
         loss.backward()
         optimizer.step()
@@ -160,7 +186,11 @@ def run_training(args):
             # HINT: Set img_size to (128, 128)
             # HINT: Get per_splat from args.gaussians_per_splat
             # HINT: camera is available above
-            pred_img = None
+            pred_img, _, _ = scene.render(camera, 
+                                            per_splat=args.gaussians_per_splat,
+                                            img_size=(128,128),
+                                            bg_colour=(0.0, 0.0, 0.0)
+                                            )
 
         pred_npy = pred_img.detach().cpu().numpy()
         pred_npy = (np.clip(pred_npy, 0.0, 1.0) * 255.0).astype(np.uint8)
@@ -186,7 +216,11 @@ def run_training(args):
             # HINT: Set img_size to (128, 128)
             # HINT: Get per_splat from args.gaussians_per_splat
             # HINT: camera is available above
-            pred_img = None
+            pred_img, _, _ = scene.render(camera, 
+                                            per_splat=args.gaussians_per_splat,
+                                            img_size=(128,128),
+                                            bg_colour=(0.0, 0.0, 0.0)
+                                            )
 
             gt_npy = gt_img.detach().cpu().numpy()
             pred_npy = pred_img.detach().cpu().numpy()
