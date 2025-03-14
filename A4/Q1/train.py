@@ -31,10 +31,10 @@ def setup_optimizer(gaussians):
     # fast with the default settings.
     # HINT: Consider setting different learning rates for different sets of parameters.
     parameters = [
-        {'params': [gaussians.pre_act_opacities], 'lr': 0.05, "name": "opacities"},
-        {'params': [gaussians.pre_act_scales], 'lr': 0.05, "name": "scales"},
-        {'params': [gaussians.colours], 'lr': 0.05, "name": "colours"},
-        {'params': [gaussians.means], 'lr': 0.05, "name": "means"},
+        {'params': [gaussians.pre_act_opacities], 'lr': 0.001, "name": "opacities"},
+        {'params': [gaussians.pre_act_scales], 'lr': 0.001, "name": "scales"},
+        {'params': [gaussians.colours], 'lr': 0.001, "name": "colours"},
+        {'params': [gaussians.means], 'lr': 0.0001, "name": "means"},
     ]
     optimizer = torch.optim.Adam(parameters, lr=0.0, eps=1e-15)
     optimizer = None
