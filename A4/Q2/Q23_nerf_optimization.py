@@ -160,12 +160,25 @@ def optimize_nerf(
                 text_cond = embeddings["default"]
             else:
                 ### YOUR CODE HERE ###
-                pass
+                azimuth_value = azimuth.item()
+                if -45 <= azimuth_value <= 45:
+                    text_cond = embeddings["front"]
+                elif azimuth_value > 135 or azimuth_value < -135:
+                    text_cond = embeddings["back"]
+                else:
+                    text_cond = embeddings["side"]
 
   
             ### YOUR CODE HERE ###
-            latents = 
-            loss = 
+            pred_rgb_resized = torch.nn.functional.interpolate(pred_rgb, (512, 512))
+            latents = sds.encode_imgs(pred_rgb_resized)
+            loss = sds.sds_loss(
+                latents, 
+                text_cond, 
+                text_embeddings_uncond=text_uncond,
+                guidance_scale=100,
+                grad_scale=1
+            )
 
             # regularizations
             if args.lambda_entropy > 0:
@@ -301,10 +314,10 @@ if __name__ == "__main__":
     ### YOUR CODE HERE ###
     # You wil need to tune the following parameters to obtain good NeRF results
     ### regularizations
-    parser.add_argument('--lambda_entropy', type=float, default=0, help="loss scale for alpha entropy")
-    parser.add_argument('--lambda_orient', type=float, default=0, help="loss scale for orientation")
+    parser.add_argument('--lambda_entropy', type=float, default=1e-3, help="loss scale for alpha entropy")
+    parser.add_argument('--lambda_orient', type=float, default=1e-2, help="loss scale for orientation")
     ### shading options
-    parser.add_argument('--latent_iter_ratio', type=float, default=0, help="training iters that only use albedo shading")
+    parser.add_argument('--latent_iter_ratio', type=float, default=0.15, help="training iters that only use albedo shading")
 
 
     parser.add_argument(
