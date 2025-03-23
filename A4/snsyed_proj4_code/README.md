@@ -58,18 +58,3 @@ python Q23_nerf_optimization.py --prompt="A blue coffee mug" --iters=4100 --lamb
 python Q23_nerf_optimization.py --prompt="a sea turtle" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
 python Q23_nerf_optimization.py --prompt="a feasting squirrel" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
 ```
-
-### 2.4.1 View-dependent text embedding (10 points)
-```
-
-```
-
-### 2.4.2 Other 3D representation (10 points)
-```
-
-```
-
-### 2.4.3 Variation of implementation of SDS loss (10 points)
-```
-
-```
