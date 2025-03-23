@@ -10,70 +10,66 @@ cd <path_to_solution_folder>
 The submitted report can be found over here: https://www.cs.cmu.edu/afs/andrew.cmu.edu/course/16/825/www/projects/snsyed/proj4/
 
 
-### 1.1.5 Perform Splatting (5 points)
+### 1.1 3D Gaussian Rasterization (35 points)
 
 ```
-python volume_rendering_main.py --config-name=box
+python render.py
 ```
 
-### 1.4. Point sampling (5 points)
+### 1.2 Training 3D Gaussian Representations (15 points)
 ```
-python volume_rendering_main.py --config-name=box
-```
-
-### 1.5. Volume rendering (20 points)
-```
-python volume_rendering_main.py --config-name=box
+python train.py
 ```
 
-### 2.3. Visualization
+### 1.3.1 Rendering Using Spherical Harmonics (10 Points)
 ```
-python volume_rendering_main.py --config-name=train_box
-```
-### 3. Optimizing a Neural Radiance Field (NeRF) (20 points)
-```
-python volume_rendering_main.py --config-name=nerf_lego
+python render.py
 ```
 
-### 4.1 View Dependence (10 points)
+### 1.3.2 Training On a Harder Scene (10 Points)
 ```
-python volume_rendering_main.py --config-name=nerf_materials
-python volume_rendering_main.py --config-name=nerf_materials_high_res
+python train_harder_scene.py --gaussians_per_splat 4000
 ```
-
-### 4.2 Coarse/Fine Sampling (10 points) (Extra Credit)
+### 2.1 SDS Loss + Image Optimization (20 points)
 ```
-python volume_rendering_main.py --config-name=nerf_materials
-python volume_rendering_main.py --config-name=nerf_lego
-```
-
-### 5. Sphere Tracing (10 points)
-```
-python -m surface_rendering_main --config-name=torus_surface
-```
-
-### 6. Optimizing a Neural SDF (15 points)
-```
-python -m surface_rendering_main --config-name=points_surface
+python Q21_image_optimization.py --prompt="a hamburger" --sds_guidance=0
+python Q21_image_optimization.py --prompt="a hamburger" --sds_guidance=1 --postfix="_guidance"
+python Q21_image_optimization.py --prompt="a standing corgi dog" --sds_guidance=0
+python Q21_image_optimization.py --prompt="a standing corgi dog" --sds_guidance=1 --postfix="_guidance"
+python Q21_image_optimization.py --prompt="piano playing shiba inu dog" --sds_guidance=0
+python Q21_image_optimization.py --prompt="piano playing shiba inu dog" --sds_guidance=1 --postfix="_guidance"
+python Q21_image_optimization.py --prompt="a water type dragon pokemon" --sds_guidance=0
+python Q21_image_optimization.py --prompt="a water type dragon pokemon" --sds_guidance=1 --postfix="_guidance"
+python Q21_image_optimization.py --prompt="a standing baby yoda" --sds_guidance=0
+python Q21_image_optimization.py --prompt="a standing baby yoda" --sds_guidance=1 --postfix="_guidance"
 ```
 
-### 7. VolSDF (15 points)
+### 2.2 Texture Map Optimization for Mesh (15 points)
 ```
-python -m surface_rendering_main --config-name=volsdf_surface
-```
-
-### 8.1. Render a Large Scene with Sphere Tracing (10 points)
-```
-python -m surface_rendering_main --config-name=complex_scene
+python Q22_mesh_optimization.py --prompt="A cow wearing batman textured costume"
+python Q22_mesh_optimization.py --prompt="A cow made of shiny lava obsidian"
+python Q22_mesh_optimization.py --prompt="A cow with cosmic clouds patterns"
 ```
 
-### 8.2 Fewer Training Views (10 points) (Extra Credit)
+### 2.3 NeRF Optimization (15 points)
 ```
-python -m surface_rendering_main --config-name=volsdf_surface
-python volume_rendering_main.py --config-name=nerf_lego
+python Q23_nerf_optimization.py --prompt="A standing corgi dog" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
+python Q23_nerf_optimization.py --prompt="A blue coffee mug" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
+python Q23_nerf_optimization.py --prompt="a sea turtle" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
+python Q23_nerf_optimization.py --prompt="a feasting squirrel" --iters=4100 --lambda_entropy=0.0005 --lambda_orient=0.01 --latent_iter_ratio=0.2
 ```
 
-### 8.3 Alternate SDF to Density Conversions (10 points) (Extra Credit)
+### 2.4.1 View-dependent text embedding (10 points)
 ```
-python -m surface_rendering_main --config-name=complex_scene
+
+```
+
+### 2.4.2 Other 3D representation (10 points)
+```
+
+```
+
+### 2.4.3 Variation of implementation of SDS loss (10 points)
+```
+
 ```
