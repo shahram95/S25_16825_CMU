@@ -8,6 +8,7 @@ from pytorch3d.renderer import (
     PointsRasterizer,
 )
 import imageio
+import numpy as np
 
 def save_checkpoint(epoch, model, args, best=False):
     if best:
@@ -86,3 +87,76 @@ def viz_seg (verts, labels, path, device):
 
     imageio.mimsave(path, rend, fps=15)
 
+def viz_cls(verts, label=None, path="output.gif", device="cpu"):
+    """
+    Visualize classification result
+    output: a 360-degree gif
+    
+    Args:
+        verts: tensor of shape (N, 3) containing 3D point coordinates
+        label: class label (int) or None
+        path: output path for the gif
+        device: device to use for rendering
+    """
+    
+    
+    image_size = 256
+    background_color = (1, 1, 1)
+    
+    # Class colors: red for chair, green for vase, blue for lamp
+    class_colors = [
+        [1.0, 0.0, 0.0],  # Chair (Red)
+        [0.0, 1.0, 0.0],  # Vase (Green)
+        [0.0, 0.0, 1.0]   # Lamp (Blue)
+    ]
+    
+    # Construct various camera viewpoints
+    dist = 3
+    elev = 30  # Slightly elevated view for better visualization
+    azim = [180 - 12*i for i in range(30)]
+    R, T = pytorch3d.renderer.cameras.look_at_view_transform(
+        dist=dist, elev=elev, azim=azim, device=device
+    )
+    cameras = pytorch3d.renderer.FoVPerspectiveCameras(R=R, T=T, fov=60, device=device)
+    
+    # Ensure verts has the right shape and type
+    if not isinstance(verts, torch.Tensor):
+        verts = torch.tensor(verts)
+        
+    verts = verts.to(device).to(torch.float)
+    if len(verts.shape) == 2:
+        verts = verts.unsqueeze(0)
+        
+    # Repeat points for each camera view
+    sample_verts = verts.repeat(30, 1, 1)
+    
+    # Determine colors based on label
+    if label is not None:
+        # Use specific class color if label is provided
+        color = torch.tensor(class_colors[label], device=device)
+    else:
+        # Default color if no label is provided
+        color = torch.tensor([0.5, 0.5, 1.0], device=device)
+        
+    # Create color tensor for all points
+    sample_colors = color.view(1, 1, 3).repeat(30, verts.shape[1], 1)
+    
+    # Create point cloud object
+    point_cloud = pytorch3d.structures.Pointclouds(
+        points=sample_verts,
+        features=sample_colors
+    ).to(device)
+    
+    # Render
+    renderer = get_points_renderer(
+        image_size=image_size, 
+        background_color=background_color, 
+        device=device
+    )
+    rend = renderer(point_cloud, cameras=cameras).cpu().numpy()
+    
+    # Convert to uint8 for saving
+    rend = (rend * 255).astype(np.uint8)
+    
+    # Save as gif
+    imageio.mimsave(path, rend, fps=15, loop=0)
