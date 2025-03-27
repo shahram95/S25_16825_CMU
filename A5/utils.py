@@ -87,18 +87,20 @@ def viz_seg (verts, labels, path, device):
 
     imageio.mimsave(path, rend, fps=15)
 
-def viz_cls(verts, label=None, path="output.gif", device="cpu"):
+def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
     """
     Visualize classification result
     output: a 360-degree gif
     
     Args:
-        verts: tensor of shape (N, 3) containing 3D point coordinates
-        label: class label (int) or None
+        points: tensor of shape (N, 3) containing 3D point coordinates
+        true_label: true class label (int)
+        pred_label: predicted class label (int)
+        class_names: list of class names
         path: output path for the gif
         device: device to use for rendering
     """
-    
+    import numpy as np
     
     image_size = 256
     background_color = (1, 1, 1)
@@ -119,31 +121,26 @@ def viz_cls(verts, label=None, path="output.gif", device="cpu"):
     )
     cameras = pytorch3d.renderer.FoVPerspectiveCameras(R=R, T=T, fov=60, device=device)
     
-    # Ensure verts has the right shape and type
-    if not isinstance(verts, torch.Tensor):
-        verts = torch.tensor(verts)
+    # Ensure points has the right shape and type
+    if not isinstance(points, torch.Tensor):
+        points = torch.tensor(points)
         
-    verts = verts.to(device).to(torch.float)
-    if len(verts.shape) == 2:
-        verts = verts.unsqueeze(0)
+    points = points.to(device).to(torch.float)
+    if len(points.shape) == 2:
+        points = points.unsqueeze(0)
         
     # Repeat points for each camera view
-    sample_verts = verts.repeat(30, 1, 1)
+    sample_points = points.repeat(30, 1, 1)
     
-    # Determine colors based on label
-    if label is not None:
-        # Use specific class color if label is provided
-        color = torch.tensor(class_colors[label], device=device)
-    else:
-        # Default color if no label is provided
-        color = torch.tensor([0.5, 0.5, 1.0], device=device)
-        
+    # Use color based on predicted label
+    color = torch.tensor(class_colors[pred_label], device=device)
+    
     # Create color tensor for all points
-    sample_colors = color.view(1, 1, 3).repeat(30, verts.shape[1], 1)
+    sample_colors = color.view(1, 1, 3).repeat(30, points.shape[1], 1)
     
     # Create point cloud object
     point_cloud = pytorch3d.structures.Pointclouds(
-        points=sample_verts,
+        points=sample_points,
         features=sample_colors
     ).to(device)
     
@@ -155,8 +152,27 @@ def viz_cls(verts, label=None, path="output.gif", device="cpu"):
     )
     rend = renderer(point_cloud, cameras=cameras).cpu().numpy()
     
-    # Convert to uint8 for saving
-    rend = (rend * 255).astype(np.uint8)
+    # Add text annotations
+    for i in range(len(rend)):
+        img = rend[i]
+        img = (img * 255).astype(np.uint8)
+        
+        # Use PIL to add text
+        from PIL import Image, ImageDraw, ImageFont
+        pil_img = Image.fromarray(img)
+        draw = ImageDraw.Draw(pil_img)
+        
+        # Try to load a font, use default if not available
+        try:
+            font = ImageFont.truetype("DejaVuSans.ttf", 16)
+        except IOError:
+            font = ImageFont.load_default()
+        
+        # Add text for true and predicted labels
+        text = f"True: {class_names[true_label]}  Pred: {class_names[pred_label]}"
+        draw.text((10, 10), text, fill=(0, 0, 0), font=font)
+        
+        rend[i] = np.array(pil_img)
     
     # Save as gif
     imageio.mimsave(path, rend, fps=15, loop=0)
