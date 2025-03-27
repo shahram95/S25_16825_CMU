@@ -101,10 +101,15 @@ def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
         device: device to use for rendering
     """
     import numpy as np
+    import os
+    
+    # Always ensure the path ends with .gif
+    base_path, ext = os.path.splitext(path)
+    if ext.lower() != '.gif':
+        path = base_path + '.gif'
     
     image_size = 256
     background_color = (1, 1, 1)
-    
     # Class colors: red for chair, green for vase, blue for lamp
     class_colors = [
         [1.0, 0.0, 0.0],  # Chair (Red)
@@ -124,11 +129,11 @@ def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
     # Ensure points has the right shape and type
     if not isinstance(points, torch.Tensor):
         points = torch.tensor(points)
-        
+    
     points = points.to(device).to(torch.float)
     if len(points.shape) == 2:
         points = points.unsqueeze(0)
-        
+    
     # Repeat points for each camera view
     sample_points = points.repeat(30, 1, 1)
     
@@ -146,8 +151,8 @@ def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
     
     # Render
     renderer = get_points_renderer(
-        image_size=image_size, 
-        background_color=background_color, 
+        image_size=image_size,
+        background_color=background_color,
         device=device
     )
     rend = renderer(point_cloud, cameras=cameras).cpu().numpy()
@@ -155,5 +160,5 @@ def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
     # Convert images to uint8 before saving
     rend_uint8 = (rend * 255).astype(np.uint8)
     
-    # Save as gif without attempting to add text
+    # Save as gif
     imageio.mimsave(path, rend_uint8, fps=15, loop=0)

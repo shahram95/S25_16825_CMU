@@ -110,15 +110,15 @@ def main(args):
     for class_idx, class_name in enumerate(class_names):
         sample_data = viz_data['successes'][class_idx]
         for i, data in enumerate(sample_data):
-            outfile = f'./visualization/success_{class_name}_{i}.png'
+            outfile = f'./visualization/success_{class_name}_{i}.gif'
             viz_cls(data['points'], data['true_label'], data['pred_label'], class_names, outfile)
-    
+
     # Visualize failed classifications
     print("Visualizing failed classifications...")
     for class_idx, class_name in enumerate(class_names):
         sample_data = viz_data['failures'][class_idx]
         for i, data in enumerate(sample_data):
-            outfile = f'./visualization/failure_{class_name}_{i}.png'
+            outfile = f'./visualization/failure_{class_name}_{i}.gif'
             viz_cls(data['points'], data['true_label'], data['pred_label'], class_names, outfile)
     
     print("Visualization complete.")
