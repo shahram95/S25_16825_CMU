@@ -152,27 +152,8 @@ def viz_cls(points, true_label, pred_label, class_names, path, device="cpu"):
     )
     rend = renderer(point_cloud, cameras=cameras).cpu().numpy()
     
-    # Add text annotations
-    for i in range(len(rend)):
-        img = rend[i]
-        img = (img * 255).astype(np.uint8)
-        
-        # Use PIL to add text
-        from PIL import Image, ImageDraw, ImageFont
-        pil_img = Image.fromarray(img)
-        draw = ImageDraw.Draw(pil_img)
-        
-        # Try to load a font, use default if not available
-        try:
-            font = ImageFont.truetype("DejaVuSans.ttf", 16)
-        except IOError:
-            font = ImageFont.load_default()
-        
-        # Add text for true and predicted labels
-        text = f"True: {class_names[true_label]}  Pred: {class_names[pred_label]}"
-        draw.text((10, 10), text, fill=(0, 0, 0), font=font)
-        
-        rend[i] = np.array(pil_img)
+    # Convert images to uint8 before saving
+    rend_uint8 = (rend * 255).astype(np.uint8)
     
-    # Save as gif
-    imageio.mimsave(path, rend, fps=15, loop=0)
+    # Save as gif without attempting to add text
+    imageio.mimsave(path, rend_uint8, fps=15, loop=0)
