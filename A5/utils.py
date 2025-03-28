@@ -103,25 +103,37 @@ def viz_seg(verts, labels, path, device):
     R, T = pytorch3d.renderer.cameras.look_at_view_transform(dist=dist, elev=elev, azim=azim, device=device)
     c = pytorch3d.renderer.FoVPerspectiveCameras(R=R, T=T, fov=60, device=device)
 
-    # Get the number of points from the input data
-    num_points = verts.shape[1]  # This line is changed
-
-    sample_verts = verts.unsqueeze(0).repeat(30,1,1).to(torch.float)
-    sample_labels = labels.unsqueeze(0)
+    # Ensure tensors are properly shaped
+    if len(verts.shape) == 2:  # Shape: [N, 3]
+        num_points = verts.shape[0]
+        sample_verts = verts.unsqueeze(0).repeat(30, 1, 1).to(torch.float)
+    else:  # Shape: [B, N, 3]
+        num_points = verts.shape[1]
+        sample_verts = verts.repeat(30, 1, 1).to(torch.float)
     
-    # Create color tensor with the correct number of points
-    sample_colors = torch.zeros((1,num_points,3))  # This line is changed
+    if len(labels.shape) == 1:  # Shape: [N]
+        sample_labels = labels.unsqueeze(0)
+    else:  # Shape: [B, N]
+        sample_labels = labels
+
+    # Create color tensor with correct dimensions
+    sample_colors = torch.zeros((1, num_points, 3))
 
     # Colorize points based on segmentation labels
     for i in range(6):
-        sample_colors[sample_labels==i] = torch.tensor(colors[i])
+        mask = (sample_labels == i)
+        if mask.sum() > 0:
+            sample_colors[mask] = torch.tensor(colors[i])
 
-    sample_colors = sample_colors.repeat(30,1,1).to(torch.float)
+    sample_colors = sample_colors.repeat(30, 1, 1).to(torch.float)
 
-    point_cloud = pytorch3d.structures.Pointclouds(points=sample_verts, features=sample_colors).to(device)
+    point_cloud = pytorch3d.structures.Pointclouds(
+        points=sample_verts,
+        features=sample_colors
+    ).to(device)
 
     renderer = get_points_renderer(image_size=image_size, background_color=background_color, device=device)
-    rend = renderer(point_cloud, cameras=c).cpu().numpy() # (30, 256, 256, 3)
+    rend = renderer(point_cloud, cameras=c).cpu().numpy()
     rend = (rend * 255).astype(np.uint8)
 
     imageio.mimsave(path, rend, fps=15)
