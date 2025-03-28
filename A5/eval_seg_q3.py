@@ -118,7 +118,7 @@ def test_rotation_range(model, test_data, test_label, device, batch_size=32, axi
         angles: Array of angles tested
         accuracies: Array of corresponding accuracies
     """
-    angles = np.arange(0, 360, 30)  # Test rotations every 30 degrees
+    angles = np.arange(0, 360, 10)  # Test rotations every 30 degrees
     accuracies = []
     
     print(f"Testing rotation robustness around {axis}-axis...")
@@ -173,7 +173,7 @@ def test_point_sampling_range(model, test_data, test_label, device, batch_size=3
         point_counts: Array of point counts tested
         accuracies: Array of corresponding accuracies
     """
-    point_counts = [100, 500, 1000, 2000, 4000, 6000, 8000, 10000]
+    point_counts = [50, 100, 500, 1000, 5000, 10000, 15000]
     accuracies = []
     
     print("Testing point count robustness...")
