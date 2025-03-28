@@ -31,7 +31,7 @@ def create_parser():
     parser.add_argument('--point_range', action='store_true', help='Test accuracy across a range of point counts')
     
     parser.add_argument('--exp_name', type=str, default="exp", help='The name of the experiment')
-    parser.add_argument('--batch_size', type=int, default=32, help='The number of images in a batch.')
+    parser.add_argument('--batch_size', type=int, default=16, help='The number of images in a batch.')
 
     return parser
 
