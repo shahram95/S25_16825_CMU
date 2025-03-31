@@ -22,7 +22,7 @@ def create_parser():
 
     parser.add_argument('--test_data', type=str, default='./data/seg/data_test.npy')
     parser.add_argument('--test_label', type=str, default='./data/seg/label_test.npy')
-    parser.add_argument('--output_dir', type=str, default='./output')
+    parser.add_argument('--output_dir', type=str, default='./robustness_results_seg')
 
     # Robustness analysis parameters
     parser.add_argument('--rotation', type=float, default=0, help='Rotation angle in degrees (around z-axis)')
@@ -36,45 +36,91 @@ def create_parser():
     return parser
 
 
+# def evaluate_model(model, test_data, test_label, device, batch_size=32, point_indices=None, rotation_angle=0, rotation_axis='z'):
+#     """
+#     Evaluates the segmentation model with specified modifications.
+    
+#     Args:
+#         model: The segmentation model
+#         test_data: Tensor of test data
+#         test_label: Tensor of test labels
+#         device: Device to use for evaluation
+#         batch_size: Batch size for evaluation
+#         point_indices: Indices of points to use (if None, use all points)
+#         rotation_angle: Angle in degrees to rotate points
+#         rotation_axis: Axis for rotation ('x', 'y', or 'z')
+        
+#     Returns:
+#         test_accuracy: Overall test accuracy
+#         object_accuracies: List of per-object accuracies
+#         pred_label: Predicted labels
+#     """
+#     # Apply point subsampling if specified
+#     if point_indices is not None:
+#         test_data = test_data[:, point_indices, :]
+#         test_label = test_label[:, point_indices]
+    
+#     # Apply rotation if specified
+#     if rotation_angle != 0:
+#         # Create rotation matrix
+#         rot = R.from_euler(rotation_axis, rotation_angle, degrees=True)
+#         rot_matrix = torch.tensor(rot.as_matrix(), dtype=torch.float32, device=device)
+        
+#         # Apply rotation to each object
+#         batch_size = test_data.shape[0]
+#         test_data = torch.bmm(
+#             test_data.to(device),
+#             rot_matrix.expand(batch_size, 3, 3)
+#         ).cpu()
+    
+#     # Process data in batches to predict segmentation
+#     num_samples = test_data.shape[0]
+#     num_batches = (num_samples + batch_size - 1) // batch_size  # Ceiling division
+#     pred_label = torch.zeros_like(test_label)
+    
+#     # Get model predictions
+#     model.eval()
+#     with torch.no_grad():
+#         for i in range(num_batches):
+#             start_idx = i * batch_size
+#             end_idx = min((i + 1) * batch_size, num_samples)
+            
+#             batch_data = test_data[start_idx:end_idx].to(device)
+#             batch_pred = model(batch_data)
+#             pred_label[start_idx:end_idx] = torch.argmax(batch_pred, dim=2).cpu()
+    
+#     # Calculate overall accuracy
+#     test_accuracy = pred_label.eq(test_label.data).cpu().sum().item() / (test_label.reshape((-1,1)).size()[0])
+    
+#     # Calculate per-object accuracies
+#     object_accuracies = []
+#     for i in range(num_samples):
+#         acc = pred_label[i].eq(test_label[i].data).cpu().sum().item() / test_label[i].size(0)
+#         object_accuracies.append((i, acc))
+    
+#     return test_accuracy, object_accuracies, pred_label
+
 def evaluate_model(model, test_data, test_label, device, batch_size=32, point_indices=None, rotation_angle=0, rotation_axis='z'):
     """
-    Evaluates the segmentation model with specified modifications.
-    
-    Args:
-        model: The segmentation model
-        test_data: Tensor of test data
-        test_label: Tensor of test labels
-        device: Device to use for evaluation
-        batch_size: Batch size for evaluation
-        point_indices: Indices of points to use (if None, use all points)
-        rotation_angle: Angle in degrees to rotate points
-        rotation_axis: Axis for rotation ('x', 'y', or 'z')
-        
-    Returns:
-        test_accuracy: Overall test accuracy
-        object_accuracies: List of per-object accuracies
-        pred_label: Predicted labels
+    Memory-efficient evaluation that processes smaller batches when rotation is applied.
     """
     # Apply point subsampling if specified
     if point_indices is not None:
         test_data = test_data[:, point_indices, :]
         test_label = test_label[:, point_indices]
     
-    # Apply rotation if specified
+    # Create rotation matrix if needed (on CPU)
     if rotation_angle != 0:
-        # Create rotation matrix
         rot = R.from_euler(rotation_axis, rotation_angle, degrees=True)
-        rot_matrix = torch.tensor(rot.as_matrix(), dtype=torch.float32, device=device)
-        
-        # Apply rotation to each object
-        batch_size = test_data.shape[0]
-        test_data = torch.bmm(
-            test_data.to(device),
-            rot_matrix.expand(batch_size, 3, 3)
-        ).cpu()
+        rot_matrix = torch.tensor(rot.as_matrix(), dtype=torch.float32)
     
     # Process data in batches to predict segmentation
     num_samples = test_data.shape[0]
+    
+    # Use smaller batches for rotation to avoid memory issues
+    if rotation_angle != 0:
+        batch_size = 1  # Process one sample at a time when rotating
+        
     num_batches = (num_samples + batch_size - 1) // batch_size  # Ceiling division
     pred_label = torch.zeros_like(test_label)
     
@@ -82,12 +128,42 @@ def evaluate_model(model, test_data, test_label, device, batch_size=32, point_in
     model.eval()
     with torch.no_grad():
         for i in range(num_batches):
+            # Clear cache before processing each batch
+            torch.cuda.empty_cache()
+            
             start_idx = i * batch_size
             end_idx = min((i + 1) * batch_size, num_samples)
             
-            batch_data = test_data[start_idx:end_idx].to(device)
-            batch_pred = model(batch_data)
-            pred_label[start_idx:end_idx] = torch.argmax(batch_pred, dim=2).cpu()
+            # Get current batch data (keep on CPU initially)
+            batch_data = test_data[start_idx:end_idx].clone()
+            
+            # Apply rotation on CPU if specified
+            if rotation_angle != 0:
+                # Process rotation on CPU
+                for j in range(batch_data.shape[0]):
+                    sample = batch_data[j]
+                    batch_data[j] = torch.matmul(sample, rot_matrix)
+            
+            # Move data to device only for inference
+            try:
+                batch_data = batch_data.to(device)
+                batch_pred = model(batch_data)
+                pred_label[start_idx:end_idx] = torch.argmax(batch_pred, dim=2).cpu()
+            except RuntimeError as e:
+                if 'out of memory' in str(e):
+                    print(f"GPU out of memory at batch {i}, falling back to CPU")
+                    # Move model to CPU temporarily
+                    model = model.cpu()
+                    batch_pred = model(batch_data.cpu())
+                    pred_label[start_idx:end_idx] = torch.argmax(batch_pred, dim=2)
+                    # Move model back to GPU
+                    model = model.to(device)
+                else:
+                    raise e
+            
+            # Clean up GPU memory
+            del batch_data
+            torch.cuda.empty_cache()
     
     # Calculate overall accuracy
     test_accuracy = pred_label.eq(test_label.data).cpu().sum().item() / (test_label.reshape((-1,1)).size()[0])
@@ -101,7 +177,7 @@ def evaluate_model(model, test_data, test_label, device, batch_size=32, point_in
     return test_accuracy, object_accuracies, pred_label
 
 
-def test_rotation_range(model, test_data, test_label, device, batch_size=32, axis='z', output_dir='./output'):
+def test_rotation_range(model, test_data, test_label, device, batch_size=32, axis='z', output_dir='./robustness_results_seg'):
     """
     Tests segmentation accuracy across a range of rotation angles.
     
@@ -157,7 +233,7 @@ def test_rotation_range(model, test_data, test_label, device, batch_size=32, axi
     return angles, accuracies
 
 
-def test_point_sampling_range(model, test_data, test_label, device, batch_size=32, output_dir='./output'):
+def test_point_sampling_range(model, test_data, test_label, device, batch_size=32, output_dir='./robustness_results_seg'):
     """
     Tests segmentation accuracy across a range of point counts.
     
@@ -173,7 +249,7 @@ def test_point_sampling_range(model, test_data, test_label, device, batch_size=3
         point_counts: Array of point counts tested
         accuracies: Array of corresponding accuracies
     """
-    point_counts = [50, 100, 500, 1000, 5000, 10000, 15000]
+    point_counts = [50, 100, 500, 1000, 5000, 10000]
     accuracies = []
     
     print("Testing point count robustness...")
